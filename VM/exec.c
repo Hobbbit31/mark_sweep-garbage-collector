@@ -5,6 +5,19 @@
 #include <stdlib.h>
 #include <stdint.h>
 
+static int pop_int(Program *p) {
+    Value v = vm_pop(p);
+    if (v.type != VAL_INT) {
+        fprintf(stderr, "error: expected int on stack\n");
+        exit(1);
+    }
+    return v.int_val;
+}
+
+static void push_int(Program *p, int value) {
+    vm_push(p, make_int(value));
+}
+
 static int needs_operand(unsigned char op) {
     /* instructions that carry a 4-byte operand */
     return (
@@ -46,50 +59,50 @@ void vm_run(Program *p) {
         switch (op) {
             case 0x01: { /* PUSH */
                 int value = read_int32(p->code, pc + 1);
-                vm_push(p, value);
+                push_int(p, value);
                 break;
             }
             case 0x02: /* POP */
                 (void)vm_pop(p);
                 break;
             case 0x03: { /* DUP */
-                int value = vm_pop(p);
+                Value value = vm_pop(p);
                 vm_push(p, value);
                 vm_push(p, value);
                 break;
             }
             case 0x10: { /* ADD */
-                int b = vm_pop(p);
-                int a = vm_pop(p);
-                vm_push(p, a + b);
+                int b = pop_int(p);
+                int a = pop_int(p);
+                push_int(p, a + b);
                 break;
             }
             case 0x11: { /* SUB */
-                int b = vm_pop(p);
-                int a = vm_pop(p);
-                vm_push(p, a - b);
+                int b = pop_int(p);
+                int a = pop_int(p);
+                push_int(p, a - b);
                 break;
             }
             case 0x12: { /* MUL */
-                int b = vm_pop(p);
-                int a = vm_pop(p);
-                vm_push(p, a * b);
+                int b = pop_int(p);
+                int a = pop_int(p);
+                push_int(p, a * b);
                 break;
             }
             case 0x13: { /* DIV */
-                int b = vm_pop(p);
-                int a = vm_pop(p);
+                int b = pop_int(p);
+                int a = pop_int(p);
                 if (b == 0) {
                     fprintf(stderr, "error: division by zero\n");
                     exit(1);
                 }
-                vm_push(p, a / b);
+                push_int(p, a / b);
                 break;
             }
             case 0x14: { /* CMP */
-                int b = vm_pop(p);
-                int a = vm_pop(p);
-                vm_push(p, (a < b) ? 1 : 0);
+                int b = pop_int(p);
+                int a = pop_int(p);
+                push_int(p, (a < b) ? 1 : 0);
                 break;
             }
             case 0x20: { /* JMP */
@@ -103,7 +116,7 @@ void vm_run(Program *p) {
             }
             case 0x21: { /* JZ */
                 int addr = read_int32(p->code, pc + 1);
-                int value = vm_pop(p);
+                int value = pop_int(p);
                 if (value == 0) {
                     if (addr < 0 || addr >= p->code_size) {
                         fprintf(stderr, "error: invalid jump address %d\n", addr);
@@ -115,7 +128,7 @@ void vm_run(Program *p) {
             }
             case 0x22: { /* JNZ */
                 int addr = read_int32(p->code, pc + 1);
-                int value = vm_pop(p);
+                int value = pop_int(p);
                 if (value != 0) {
                     if (addr < 0 || addr >= p->code_size) {
                         fprintf(stderr, "error: invalid jump address %d\n", addr);
@@ -127,7 +140,7 @@ void vm_run(Program *p) {
             }
             case 0x30: { /* STORE */
                 int idx = read_int32(p->code, pc + 1);
-                int value = vm_pop(p);
+                Value value = vm_pop(p);
                 if (idx < 0 || idx >= MEM_SIZE) {
                     fprintf(stderr, "error: invalid memory index %d\n", idx);
                     exit(1);

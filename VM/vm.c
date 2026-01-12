@@ -12,7 +12,7 @@ void vm_init(Program *p, unsigned char *code, int size) {
 
     /* clear memory so LOAD reads predictable values */
     for (int i = 0; i < MEM_SIZE; i++)
-        p->memory[i] = 0;
+        p->memory[i] = make_int(0);
 }
 
 void vm_free(Program *p) {
