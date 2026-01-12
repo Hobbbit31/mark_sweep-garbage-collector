@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 
+/* Pop a Value and enforce int type for arithmetic/control ops. */
 static int pop_int(Program *p) {
     Value v = vm_pop(p);
     if (v.type != VAL_INT) {
@@ -14,6 +15,7 @@ static int pop_int(Program *p) {
     return v.int_val;
 }
 
+/* Push an int as a Value to keep stack/memory uniform. */
 static void push_int(Program *p, int value) {
     vm_push(p, make_int(value));
 }

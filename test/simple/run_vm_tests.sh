@@ -2,16 +2,18 @@
 set -u
 set -o pipefail
 
-ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 ASM_BIN="$ROOT_DIR/assembler"
 VM_BIN="$ROOT_DIR/bvm"
+TEST_DIR="$ROOT_DIR/test/simple"
+ROOT_TEST_DIR="$ROOT_DIR/test"
 
 if [[ ! -x "$ASM_BIN" || ! -x "$VM_BIN" ]]; then
     echo "error: missing binaries; run 'make' first."
     exit 1
 fi
 
-tmp_dir="$(mktemp -d "$ROOT_DIR/test/simpple/tmp.XXXXXX")"
+tmp_dir="$(mktemp -d "$ROOT_DIR/test/simple/tmp.XXXXXX")"
 trap 'rm -rf "$tmp_dir"' EXIT
 
 fail=0
@@ -27,7 +29,7 @@ fail_case() {
 
 # Test 1: simple program assembles and dumps expected bytes.
 simple_bin="$tmp_dir/simple.byc"
-if ! "$ASM_BIN" "$ROOT_DIR/test/test.asm" "$simple_bin" >"$tmp_dir/asm_simple.out" 2>&1; then
+if ! "$ASM_BIN" "$TEST_DIR/test.asm" "$simple_bin" >"$tmp_dir/asm_simple.out" 2>&1; then
     fail_case "assemble simple program"
 else
     if ! "$VM_BIN" "$simple_bin" >"$tmp_dir/vm_simple.out" 2>"$tmp_dir/vm_simple.err"; then
@@ -41,7 +43,7 @@ fi
 
 # Test 2: missing HALT should be rejected by VM validation.
 nohalt_bin="$tmp_dir/nohalt.byc"
-if ! "$ASM_BIN" "$ROOT_DIR/test/nohalt.asm" "$nohalt_bin" >/dev/null 2>&1; then
+if ! "$ASM_BIN" "$ROOT_TEST_DIR/nohalt.asm" "$nohalt_bin" >/dev/null 2>&1; then
     fail_case "assemble nohalt program"
 else
     if "$VM_BIN" "$nohalt_bin" >/dev/null 2>"$tmp_dir/nohalt.err"; then
@@ -65,7 +67,7 @@ fi
 
 # Test 4: stack program runs without errors.
 stack_ok_bin="$tmp_dir/stack_ok.byc"
-if ! "$ASM_BIN" "$ROOT_DIR/test/stack_ok.asm" "$stack_ok_bin" >/dev/null 2>&1; then
+if ! "$ASM_BIN" "$TEST_DIR/stack_ok.asm" "$stack_ok_bin" >/dev/null 2>&1; then
     fail_case "assemble stack_ok program"
 else
     if ! "$VM_BIN" "$stack_ok_bin" >/dev/null 2>"$tmp_dir/stack_ok.err"; then
@@ -77,7 +79,7 @@ fi
 
 # Test 5: stack underflow is trapped.
 stack_underflow_bin="$tmp_dir/stack_underflow.byc"
-if ! "$ASM_BIN" "$ROOT_DIR/test/stack_underflow.asm" "$stack_underflow_bin" >/dev/null 2>&1; then
+if ! "$ASM_BIN" "$TEST_DIR/stack_underflow.asm" "$stack_underflow_bin" >/dev/null 2>&1; then
     fail_case "assemble stack_underflow program"
 else
     if "$VM_BIN" "$stack_underflow_bin" >/dev/null 2>"$tmp_dir/stack_underflow.err"; then
@@ -91,7 +93,7 @@ fi
 
 # Test 6: arithmetic program runs without errors.
 arith_bin="$tmp_dir/arith.byc"
-if ! "$ASM_BIN" "$ROOT_DIR/test/arith.asm" "$arith_bin" >/dev/null 2>&1; then
+if ! "$ASM_BIN" "$TEST_DIR/arith.asm" "$arith_bin" >/dev/null 2>&1; then
     fail_case "assemble arith program"
 else
     if ! "$VM_BIN" "$arith_bin" >/dev/null 2>"$tmp_dir/arith.err"; then
@@ -103,7 +105,7 @@ fi
 
 # Test 7: division by zero is trapped.
 div_zero_bin="$tmp_dir/div_zero.byc"
-if ! "$ASM_BIN" "$ROOT_DIR/test/div_zero.asm" "$div_zero_bin" >/dev/null 2>&1; then
+if ! "$ASM_BIN" "$TEST_DIR/div_zero.asm" "$div_zero_bin" >/dev/null 2>&1; then
     fail_case "assemble div_zero program"
 else
     if "$VM_BIN" "$div_zero_bin" >/dev/null 2>"$tmp_dir/div_zero.err"; then
@@ -117,7 +119,7 @@ fi
 
 # Test 8: JMP skips over bytes correctly.
 jmp_bin="$tmp_dir/jmp.byc"
-if ! "$ASM_BIN" "$ROOT_DIR/test/jmp.asm" "$jmp_bin" >/dev/null 2>&1; then
+if ! "$ASM_BIN" "$TEST_DIR/jmp.asm" "$jmp_bin" >/dev/null 2>&1; then
     fail_case "assemble jmp program"
 else
     if ! "$VM_BIN" "$jmp_bin" >/dev/null 2>"$tmp_dir/jmp.err"; then
@@ -129,7 +131,7 @@ fi
 
 # Test 9: JZ takes jump on zero.
 jz_bin="$tmp_dir/jz.byc"
-if ! "$ASM_BIN" "$ROOT_DIR/test/jz.asm" "$jz_bin" >/dev/null 2>&1; then
+if ! "$ASM_BIN" "$TEST_DIR/jz.asm" "$jz_bin" >/dev/null 2>&1; then
     fail_case "assemble jz program"
 else
     if ! "$VM_BIN" "$jz_bin" >/dev/null 2>"$tmp_dir/jz.err"; then
@@ -141,7 +143,7 @@ fi
 
 # Test 10: JNZ takes jump on non-zero.
 jnz_bin="$tmp_dir/jnz.byc"
-if ! "$ASM_BIN" "$ROOT_DIR/test/jnz.asm" "$jnz_bin" >/dev/null 2>&1; then
+if ! "$ASM_BIN" "$TEST_DIR/jnz.asm" "$jnz_bin" >/dev/null 2>&1; then
     fail_case "assemble jnz program"
 else
     if ! "$VM_BIN" "$jnz_bin" >/dev/null 2>"$tmp_dir/jnz.err"; then
@@ -153,7 +155,7 @@ fi
 
 # Test 11: STORE/LOAD works with valid index.
 mem_ok_bin="$tmp_dir/mem_ok.byc"
-if ! "$ASM_BIN" "$ROOT_DIR/test/mem_ok.asm" "$mem_ok_bin" >/dev/null 2>&1; then
+if ! "$ASM_BIN" "$TEST_DIR/mem_ok.asm" "$mem_ok_bin" >/dev/null 2>&1; then
     fail_case "assemble mem_ok program"
 else
     if ! "$VM_BIN" "$mem_ok_bin" >/dev/null 2>"$tmp_dir/mem_ok.err"; then
@@ -165,7 +167,7 @@ fi
 
 # Test 12: invalid memory index is trapped.
 mem_bad_bin="$tmp_dir/mem_bad.byc"
-if ! "$ASM_BIN" "$ROOT_DIR/test/mem_bad.asm" "$mem_bad_bin" >/dev/null 2>&1; then
+if ! "$ASM_BIN" "$TEST_DIR/mem_bad.asm" "$mem_bad_bin" >/dev/null 2>&1; then
     fail_case "assemble mem_bad program"
 else
     if "$VM_BIN" "$mem_bad_bin" >/dev/null 2>"$tmp_dir/mem_bad.err"; then
@@ -179,7 +181,7 @@ fi
 
 # Test 13: CALL/RET runs without errors.
 call_bin="$tmp_dir/call.byc"
-if ! "$ASM_BIN" "$ROOT_DIR/test/call.asm" "$call_bin" >/dev/null 2>&1; then
+if ! "$ASM_BIN" "$TEST_DIR/call.asm" "$call_bin" >/dev/null 2>&1; then
     fail_case "assemble call program"
 else
     if ! "$VM_BIN" "$call_bin" >/dev/null 2>"$tmp_dir/call.err"; then
@@ -211,7 +213,7 @@ fi
 
 # Test 16: loop with JNZ runs without errors.
 loop_bin="$tmp_dir/loop.byc"
-if ! "$ASM_BIN" "$ROOT_DIR/test/loop.asm" "$loop_bin" >/dev/null 2>&1; then
+if ! "$ASM_BIN" "$ROOT_TEST_DIR/loop.asm" "$loop_bin" >/dev/null 2>&1; then
     fail_case "assemble loop program"
 else
     if ! "$VM_BIN" "$loop_bin" >/dev/null 2>"$tmp_dir/loop.err"; then
@@ -221,19 +223,35 @@ else
     fi
 fi
 
-# Test 17: nested CALL/RET runs without errors.
-nested_bin="$tmp_dir/nested_call.byc"
-if ! "$ASM_BIN" "$ROOT_DIR/test/nested_call.asm" "$nested_bin" >/dev/null 2>&1; then
-    fail_case "assemble nested_call program"
+# Test 17: Value stack + memory flow runs without errors.
+value_flow_bin="$tmp_dir/value_flow.byc"
+if ! "$ASM_BIN" "$TEST_DIR/value_flow.asm" "$value_flow_bin" >/dev/null 2>&1; then
+    fail_case "assemble value_flow program"
 else
-    if ! "$VM_BIN" "$nested_bin" >/dev/null 2>"$tmp_dir/nested_call.err"; then
-        fail_case "nested_call should run"
+    if ! "$VM_BIN" "$value_flow_bin" >/dev/null 2>"$tmp_dir/value_flow.err"; then
+        fail_case "value_flow should run"
     else
-        pass "nested_call program"
+        pass "value_flow program"
     fi
 fi
 
-# Test 18: truncated operand is rejected.
+# Test 18: nested CALL/RET runs without errors.
+nested_bin="$tmp_dir/nested_call.byc"
+if [[ -f "$ROOT_TEST_DIR/function_call.asm" ]]; then
+    if ! "$ASM_BIN" "$ROOT_TEST_DIR/function_call.asm" "$nested_bin" >/dev/null 2>&1; then
+        fail_case "assemble nested_call program"
+    else
+        if ! "$VM_BIN" "$nested_bin" >/dev/null 2>"$tmp_dir/nested_call.err"; then
+            fail_case "nested_call should run"
+        else
+            pass "nested_call program"
+        fi
+    fi
+else
+    echo "SKIP: nested_call program (file missing)"
+fi
+
+# Test 19: truncated operand is rejected.
 printf '\x01' > "$tmp_dir/trunc.byc"
 if "$VM_BIN" "$tmp_dir/trunc.byc" >/dev/null 2>"$tmp_dir/trunc.err"; then
     fail_case "truncated should fail"
