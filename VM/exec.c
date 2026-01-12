@@ -1,5 +1,6 @@
 #include "exec.h"
 #include "stack.h"
+#include "include/object.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -18,6 +19,16 @@ static int pop_int(Program *p) {
 /* Push an int as a Value to keep stack/memory uniform. */
 static void push_int(Program *p, int value) {
     vm_push(p, make_int(value));
+}
+
+/* Pop and validate a pair object. */
+static ObjPair *pop_pair(Program *p) {
+    Value v = vm_pop(p);
+    if (v.type != VAL_OBJ || v.obj == NULL || v.obj->type != OBJ_PAIR) {
+        fprintf(stderr, "error: expected pair object on stack\n");
+        exit(1);
+    }
+    return (ObjPair *)v.obj;
 }
 
 static int needs_operand(unsigned char op) {
@@ -171,6 +182,27 @@ void vm_run(Program *p) {
             }
             case 0x41: { /* RET */
                 p->pc = vm_pop_ret(p);
+                break;
+            }
+            case 0x50: { /* PAIR */
+                Value right = vm_pop(p);
+                Value left = vm_pop(p);
+                ObjPair *pair = new_pair(left, right);
+                if (!pair) {
+                    fprintf(stderr, "error: out of memory\n");
+                    exit(1);
+                }
+                vm_push(p, make_obj((Obj *)pair));
+                break;
+            }
+            case 0x51: { /* LEFT */
+                ObjPair *pair = pop_pair(p);
+                vm_push(p, pair->left);
+                break;
+            }
+            case 0x52: { /* RIGHT */
+                ObjPair *pair = pop_pair(p);
+                vm_push(p, pair->right);
                 break;
             }
             case 0xFF: /* HALT */

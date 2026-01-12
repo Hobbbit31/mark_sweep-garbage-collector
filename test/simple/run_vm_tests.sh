@@ -179,7 +179,19 @@ else
     fi
 fi
 
-# Test 13: CALL/RET runs without errors.
+# Test 13: PAIR/LEFT/RIGHT runs without errors.
+pair_bin="$tmp_dir/pair_left_right.byc"
+if ! "$ASM_BIN" "$TEST_DIR/pair_left_right.asm" "$pair_bin" >/dev/null 2>&1; then
+    fail_case "assemble pair_left_right program"
+else
+    if ! "$VM_BIN" "$pair_bin" >/dev/null 2>"$tmp_dir/pair_left_right.err"; then
+        fail_case "pair_left_right should run"
+    else
+        pass "pair_left_right program"
+    fi
+fi
+
+# Test 14: CALL/RET runs without errors.
 call_bin="$tmp_dir/call.byc"
 if ! "$ASM_BIN" "$TEST_DIR/call.asm" "$call_bin" >/dev/null 2>&1; then
     fail_case "assemble call program"
@@ -191,7 +203,7 @@ else
     fi
 fi
 
-# Test 14: invalid jump address is trapped.
+# Test 15: invalid jump address is trapped.
 printf '\x20\xff\xff\xff\x7f\xff' > "$tmp_dir/invalid_jump.byc"
 if "$VM_BIN" "$tmp_dir/invalid_jump.byc" >/dev/null 2>"$tmp_dir/invalid_jump.err"; then
     fail_case "invalid jump should fail"
@@ -201,7 +213,7 @@ else
         pass "invalid jump trapped"
 fi
 
-# Test 15: non-.byc file is rejected.
+# Test 16: non-.byc file is rejected.
 printf '\xff' > "$tmp_dir/not_byc.bin"
 if "$VM_BIN" "$tmp_dir/not_byc.bin" >/dev/null 2>"$tmp_dir/not_byc.err"; then
     fail_case "non-byc should fail"
@@ -211,7 +223,7 @@ else
         pass "non-byc rejected"
 fi
 
-# Test 16: loop with JNZ runs without errors.
+# Test 17: loop with JNZ runs without errors.
 loop_bin="$tmp_dir/loop.byc"
 if ! "$ASM_BIN" "$ROOT_TEST_DIR/loop.asm" "$loop_bin" >/dev/null 2>&1; then
     fail_case "assemble loop program"
@@ -223,7 +235,7 @@ else
     fi
 fi
 
-# Test 17: Value stack + memory flow runs without errors.
+# Test 18: Value stack + memory flow runs without errors.
 value_flow_bin="$tmp_dir/value_flow.byc"
 if ! "$ASM_BIN" "$TEST_DIR/value_flow.asm" "$value_flow_bin" >/dev/null 2>&1; then
     fail_case "assemble value_flow program"
@@ -235,7 +247,7 @@ else
     fi
 fi
 
-# Test 18: nested CALL/RET runs without errors.
+# Test 19: nested CALL/RET runs without errors.
 nested_bin="$tmp_dir/nested_call.byc"
 if [[ -f "$ROOT_TEST_DIR/function_call.asm" ]]; then
     if ! "$ASM_BIN" "$ROOT_TEST_DIR/function_call.asm" "$nested_bin" >/dev/null 2>&1; then
@@ -251,7 +263,7 @@ else
     echo "SKIP: nested_call program (file missing)"
 fi
 
-# Test 19: truncated operand is rejected.
+# Test 20: truncated operand is rejected.
 printf '\x01' > "$tmp_dir/trunc.byc"
 if "$VM_BIN" "$tmp_dir/trunc.byc" >/dev/null 2>"$tmp_dir/trunc.err"; then
     fail_case "truncated should fail"

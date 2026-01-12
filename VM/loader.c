@@ -21,6 +21,9 @@ static int valid_opcode(unsigned char op) {
         case 0x31:
         case 0x40:
         case 0x41:
+        case 0x50:
+        case 0x51:
+        case 0x52:
         case 0xFF:
             return 1;
         default:
