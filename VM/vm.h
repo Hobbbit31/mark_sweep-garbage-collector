@@ -32,4 +32,7 @@ void vm_init(Program *p, unsigned char *code, int size);
 void vm_free(Program *p);
 void vm_dump_bytecode(Program *p);
 
+/* Expose GC roots (stack + memory) to the collector. */
+void vm_visit_roots(Program *p, void (*visit)(Obj *));
+
 #endif
