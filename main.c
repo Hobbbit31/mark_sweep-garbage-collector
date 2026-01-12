@@ -17,7 +17,13 @@ void print_stack(Program *p) {
 
     printf("Stack (top -> bottom):\n");
     for (int i = p->sp - 1; i >= 0; i--) {
-        printf("[%d] %d\n", i, p->stack[i]);
+        if (p->stack[i].type == VAL_INT) {
+            printf("[%d] %d\n", i, p->stack[i].int_val);
+        } else if (p->stack[i].type == VAL_OBJ) {
+            printf("[%d] <obj %p>\n", i, (void *)p->stack[i].obj);
+        } else {
+            printf("[%d] <unknown>\n", i);
+        }
     }
 }
 

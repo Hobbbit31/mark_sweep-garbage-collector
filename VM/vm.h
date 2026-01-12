@@ -1,6 +1,8 @@
 #ifndef VM_H
 #define VM_H
 
+#include "include/value.h"
+
 #define STACK_MAX 1024  /* fixed stack capacity */
 #define MEM_SIZE  256   /* global memory slots */
 #define VM_EXIT_OK  0   /* normal termination */
@@ -13,10 +15,10 @@ typedef struct {
 
     int pc;                 /* program counter */
 
-    int stack[STACK_MAX];   /* operand stack */
+    Value stack[STACK_MAX]; /* operand stack */
     int sp;                 /* next free slot index */
 
-    int memory[MEM_SIZE];   /* LOAD / STORE memory */
+    Value memory[MEM_SIZE]; /* LOAD / STORE memory */
 
     int call_stack[STACK_MAX]; /* return address stack */
     int csp;                   /* next free slot for call stack */
