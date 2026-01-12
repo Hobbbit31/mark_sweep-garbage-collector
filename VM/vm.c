@@ -34,3 +34,19 @@ void vm_dump_bytecode(Program *p) {
     printf("\n");
 }
 
+void vm_visit_roots(Program *p, void (*visit)(Obj *)) {
+    /* Visit object references on the operand stack. */
+    for (int i = 0; i < p->sp; i++) {
+        if (p->stack[i].type == VAL_OBJ && p->stack[i].obj) {
+            visit(p->stack[i].obj);
+        }
+    }
+
+    /* Visit object references in global memory slots. */
+    for (int i = 0; i < MEM_SIZE; i++) {
+        if (p->memory[i].type == VAL_OBJ && p->memory[i].obj) {
+            visit(p->memory[i].obj);
+        }
+    }
+}
+
