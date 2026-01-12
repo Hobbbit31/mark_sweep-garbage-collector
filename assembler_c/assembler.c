@@ -63,6 +63,10 @@ int lookup_opcode(char *m, unsigned char *op) {
     else if (strcmp(m, "CALL") == 0) *op = 0x40;
     else if (strcmp(m, "RET")  == 0) *op = 0x41;
 
+    else if (strcmp(m, "PAIR")  == 0) *op = 0x50;
+    else if (strcmp(m, "LEFT")  == 0) *op = 0x51;
+    else if (strcmp(m, "RIGHT") == 0) *op = 0x52;
+
     else if (strcmp(m, "HALT") == 0) *op = 0xFF;
 
     else return 0;
