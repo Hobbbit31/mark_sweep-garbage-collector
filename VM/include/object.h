@@ -6,6 +6,7 @@
 /* All heap object types */
 typedef enum {
     OBJ_PAIR,
+    OBJ_INT,
     OBJ_FUNCTION,
     OBJ_CLOSURE
 } ObjType;
@@ -24,6 +25,11 @@ typedef struct {
     Value right;
 } ObjPair;
 
+typedef struct {
+    Obj base;
+    int value;
+} ObjInt;
+
 /* ===== Heap tracking ===== */
 extern Obj* heap_objects;
 
@@ -32,6 +38,7 @@ void heap_register(Obj* o);
 
 /* Allocation */
 ObjPair* new_pair(Value l, Value r);
+ObjInt  *new_int(int value);
 
 
 /* graph creation from list(heap) .*/
@@ -42,7 +49,7 @@ void obj_visit_children(Obj* o, void (*visit)(Obj*));
 //garbage collector functions would go here
 void gc_mark_from_roots();
 
-void gc_add_root(Obj* o);
+// void gc_add_root(Obj* o);
 
 //This is where memory is actually freed.
 void gc_sweep();

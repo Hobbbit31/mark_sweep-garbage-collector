@@ -8,17 +8,14 @@ typedef struct Obj Obj;
 
 /* What kind of value is this? */
 typedef enum {
-    VAL_INT,
+    VAL_NIL,
     VAL_OBJ
 } ValueType;
 
 /* A VM stack cell */
 typedef struct {
     ValueType type;
-    union {
-        int32_t int_val;
-        Obj* obj;
-    };
+    Obj* obj;
 } Value;
 
 /* Constructors */

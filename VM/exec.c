@@ -7,13 +7,23 @@
 #include <stdint.h>
 
 /* Pop a Value and enforce int type for arithmetic/control ops. */
+// static int pop_int(Program *p) {
+//     Value v = vm_pop(p);
+//     if (v.type != VAL_INT) {
+//         fprintf(stderr, "error: expected int on stack\n");
+//         exit(1);
+//     }
+//     return v.int_val;
+// }
 static int pop_int(Program *p) {
     Value v = vm_pop(p);
-    if (v.type != VAL_INT) {
-        fprintf(stderr, "error: expected int on stack\n");
+
+    if (v.type != VAL_OBJ || v.obj == NULL || v.obj->type != OBJ_INT) {
+        fprintf(stderr, "error: expected integer object on stack\n");
         exit(1);
     }
-    return v.int_val;
+
+    return ((ObjInt *)v.obj)->value;
 }
 
 /* Push an int as a Value to keep stack/memory uniform. */
