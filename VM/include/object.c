@@ -58,6 +58,31 @@ ObjInt* new_int(int value) {
     return i;
 }
 
+Obj* new_function() {
+    ObjFunction* f = malloc(sizeof(ObjFunction));
+    if (!f) return NULL;
+
+    f->base.type = OBJ_FUNCTION;
+    f->base.marked = 0;
+
+    heap_register((Obj*)f);
+    return (Obj*)f;
+}
+
+Obj* new_closure(Obj* fn, Obj* env) {
+    ObjClosure* cl = malloc(sizeof(ObjClosure));
+    if (!cl) return NULL;
+
+    cl->base.type = OBJ_CLOSURE;
+    cl->base.marked = 0;
+    cl->function = fn;
+    cl->env = env;
+
+    heap_register((Obj*)cl);
+    return (Obj*)cl;
+}
+
+
 /* =====================================================
    OBJECT GRAPH TRAVERSAL
    ===================================================== */
@@ -75,6 +100,16 @@ void obj_visit_children(Obj* o, void (*visit)(Obj*)) {
         case OBJ_INT:
             /* boxed integer has no children */
             break;
+        case OBJ_FUNCTION:
+            /* function has no children in this simple VM */
+            break;
+        case OBJ_CLOSURE:
+            {
+                ObjClosure* cl = (ObjClosure*)o;
+                visit(cl->function);
+                visit(cl->env);
+                break;
+            }
         default:
             break;
     }

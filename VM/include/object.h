@@ -30,6 +30,18 @@ typedef struct {
     int value;
 } ObjInt;
 
+/* Dummy definitions for new types */
+typedef struct {
+    Obj base;
+    /* In a real VM, this would point to bytecode or a C function */
+} ObjFunction;
+
+typedef struct {
+    Obj base;
+    Obj* function; /* Reference to the ObjFunction */
+    Obj* env;      /* Reference to an ObjPair or other scope object */
+} ObjClosure;
+
 /* ===== Heap tracking ===== */
 extern Obj* heap_objects;
 
@@ -44,7 +56,9 @@ ObjInt  *new_int(int value);
 /* graph creation from list(heap) .*/
 void obj_visit_children(Obj* o, void (*visit)(Obj*));
 
-
+/* Additional object types for functions and closures(dummy part that is created to test the part) */
+Obj* new_function();
+Obj* new_closure(Obj* fn, Obj* env);
 /* GC roots & mark phase */
 //garbage collector functions would go here
 void gc_mark_from_roots();
