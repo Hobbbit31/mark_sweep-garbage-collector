@@ -1,14 +1,15 @@
 #include "value.h"
+#include "object.h"
 
-/* Create an integer value */
+/* Boxed integer constructor */
 Value make_int(int32_t x) {
     Value v;
-    v.type = VAL_INT;
-    v.int_val = x;
+    v.type = VAL_OBJ;
+    v.obj = (Obj*)new_int(x);   /* heap allocation */
     return v;
 }
 
-/* Create an object reference value */
+/* Wrap existing object */
 Value make_obj(Obj* o) {
     Value v;
     v.type = VAL_OBJ;

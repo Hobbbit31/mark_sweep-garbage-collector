@@ -2,9 +2,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+
 #include "VM/vm.h"
 #include "VM/loader.h"
 #include "VM/exec.h"
+#include "VM/include/object.h"   /* for gc_collect */
 
 
 void print_stack(Program *p) {
@@ -17,12 +19,24 @@ void print_stack(Program *p) {
 
     printf("Stack (top -> bottom):\n");
     for (int i = p->sp - 1; i >= 0; i--) {
-        if (p->stack[i].type == VAL_INT) {
-            printf("[%d] %d\n", i, p->stack[i].int_val);
-        } else if (p->stack[i].type == VAL_OBJ) {
-            printf("[%d] <obj %p>\n", i, (void *)p->stack[i].obj);
+
+        Value v = p->stack[i];
+
+        if (v.type == VAL_OBJ && v.obj != NULL) {
+
+            if (v.obj->type == OBJ_INT) {
+                ObjInt *oi = (ObjInt *)v.obj;
+                printf("[%d] ObjInt value=%d\n", i, oi->value);
+            }
+            else if (v.obj->type == OBJ_PAIR) {
+                printf("[%d] ObjPair %p\n", i, (void *)v.obj);
+            }
+            else {
+                printf("[%d] Obj(type=%d) %p\n", i, v.obj->type, (void *)v.obj);
+            }
+
         } else {
-            printf("[%d] <unknown>\n", i);
+            printf("[%d] <invalid>\n", i);
         }
     }
 }
@@ -33,7 +47,7 @@ int main(int argc, char **argv) {
     /* CLI rule */
     if (argc != 2) {
         fprintf(stderr, "usage: %s <bytecode_file>\n", argv[0]);
-        return VM_EXIT_ERR;
+        return 1;
     }
 
     const char *file = argv[1];
@@ -42,14 +56,14 @@ int main(int argc, char **argv) {
     const char *ext = strrchr(file, '.');
     if (!ext || strcmp(ext, ".byc") != 0) {
         fprintf(stderr, "error: expected .byc file\n");
-        return VM_EXIT_ERR;
+        return 1;
     }
 
     /* load bytecode */
     int size = 0;
     unsigned char *code = load_bytecode(file, &size);
     if (!code)
-        return VM_EXIT_ERR;
+        return 1;
 
     /* initialize VM program */
     Program prog;
@@ -70,9 +84,13 @@ int main(int argc, char **argv) {
     double time_taken = ((double)(end - start))* 1000.0 / CLOCKS_PER_SEC;
     printf("Execution time: %f milliseconds\n", time_taken);
     
-
+    printf("\n===== GC WHILE STACK IS LIVE =====\n");
+    gc_collect();
     print_stack(&prog);
+    
+    // printf("\n===== GC AFTER VM RUN =====\n");
+    // gc_collect();
 
     vm_free(&prog);
-    return VM_EXIT_OK;
+    return 0;
 }

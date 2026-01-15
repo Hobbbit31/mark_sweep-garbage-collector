@@ -2,7 +2,11 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+
+Program *current_program = NULL;
+
 void vm_init(Program *p, unsigned char *code, int size) {
+    current_program = p;
     p->code = code;
     p->code_size = size;
     p->pc = 0;
@@ -11,8 +15,10 @@ void vm_init(Program *p, unsigned char *code, int size) {
     p->instr_count = 0;
 
     /* clear memory so LOAD reads predictable values */
-    for (int i = 0; i < MEM_SIZE; i++)
-        p->memory[i] = make_int(0);
+    for (int i = 0; i < MEM_SIZE; i++){
+        p->memory[i].type = VAL_NIL;
+        p->memory[i].obj = NULL;
+    }
 }
 
 void vm_free(Program *p) {
@@ -34,7 +40,12 @@ void vm_dump_bytecode(Program *p) {
     printf("\n");
 }
 
-void vm_visit_roots(Program *p, void (*visit)(Obj *)) {
+void vm_visit_roots(void (*visit)(Obj *)) {
+    Program *p = current_program;
+    if (!p) {
+        return;
+    }
+
     /* Visit object references on the operand stack. */
     for (int i = 0; i < p->sp; i++) {
         if (p->stack[i].type == VAL_OBJ && p->stack[i].obj) {
@@ -49,4 +60,5 @@ void vm_visit_roots(Program *p, void (*visit)(Obj *)) {
         }
     }
 }
+
 
