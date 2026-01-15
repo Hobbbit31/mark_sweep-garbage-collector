@@ -97,6 +97,17 @@ void test_closures(Program* p) {
     gc_collect();
 }
 
+// 1.6.7: Stress Allocation
+void test_stress_allocation(Program* p) {
+    printf("\nRunning: Stress Allocation\n");
+    for (int i = 0; i < 100000; i++) {
+        new_pair(make_obj(NULL), make_obj(NULL));
+    }
+
+    /* No roots: all objects should be collected */
+    gc_collect();
+}
+
 /* --- Interactive Menu --- */
 
 int main() {
@@ -111,6 +122,7 @@ int main() {
         printf("3. Cyclic References (1.6.4)\n");
         printf("4. Deep Object Graph (1.6.5)\n");
         printf("5. Closure Capture (1.6.6)\n");
+        printf("6. Stress Allocation (1.6.7)\n");
         printf("0. Exit\n");
         printf("Enter choice: ");
         
@@ -123,6 +135,7 @@ int main() {
             case 3: test_cycles(&prog); break;
             case 4: test_deep_graph(&prog); break;
             case 5: test_closures(&prog); break;
+            case 6: test_stress_allocation(&prog); break;
             default: printf("Invalid choice.\n");
         }
         

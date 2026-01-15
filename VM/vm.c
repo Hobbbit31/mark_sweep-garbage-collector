@@ -42,6 +42,9 @@ void vm_dump_bytecode(Program *p) {
 
 void vm_visit_roots(void (*visit)(Obj *)) {
     Program *p = current_program;
+    if (!p) {
+        return;
+    }
 
     /* Visit object references on the operand stack. */
     for (int i = 0; i < p->sp; i++) {
