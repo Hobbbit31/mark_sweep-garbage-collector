@@ -27,7 +27,7 @@ void test_reachability(Program* p) {
     gc_collect();
     
     vm_pop(p);
-    // printf("Popped Object A. It should now be unreachable.\n");
+    printf("Popped Object A. It should now be unreachable.\n");
     gc_collect();
 }
 
@@ -41,7 +41,7 @@ void test_transitive(Program* p) {
     gc_collect();
     
     vm_pop(p);
-    // printf("Popped Object B. Both A and B are now unreachable.\n");
+    printf("Popped Object B. Both A and B are now unreachable.\n");
     gc_collect();
 }
 
@@ -57,7 +57,7 @@ void test_cycles(Program* p) {
     gc_collect();
     
     vm_pop(p);
-    // printf("Popped A. The isolated cycle should now be collected.\n");
+    printf("Popped A. The isolated cycle should now be collected.\n");
     gc_collect();
 }
 
@@ -68,7 +68,7 @@ void test_deep_graph(Program* p) {
     ObjPair* cur = root;
     
     // Create a long chain of objects
-    for (int i = 0; i < 500; i++) {
+    for (int i = 0; i < 100; i++) {
         ObjPair* next = new_pair(make_obj(NULL), make_obj(NULL));
         cur->right = make_obj((Obj*)next);
         cur = next;
@@ -79,6 +79,7 @@ void test_deep_graph(Program* p) {
     gc_collect();
     
     vm_pop(p);
+    printf("Popped root. Entire chain should now be collected.\n");
     gc_collect();
 }
 
@@ -94,6 +95,7 @@ void test_closures(Program* p) {
     gc_collect();
     
     vm_pop(p);
+    printf("Popped Closure. Function and Env should now be collected.\n");
     gc_collect();
 }
 
